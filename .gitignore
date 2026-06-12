@@ -1,0 +1,17 @@
+# Generated HTML output files
+analysis/
+
+# Dependency directories
+node_modules/
+.opencode/node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Agent temp files
+agent/live_*.json

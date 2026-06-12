@@ -1,0 +1,16 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "pick": {
+      "description": "Intraday screener agent — scans entire Nifty 50 for high-value stocks, applies 8-point screener, writes rich HTML at analysis/<date>/<counter>.html",
+      "mode": "primary"
+    }
+  },
+  "command": {
+    "pick": {
+      "description": "Run the intraday screener: scan full Nifty 50 for high-value (anti-manipulation) stocks, apply 8-point screener, pick the best, write HTML output at analysis/<date>/<counter>.html.",
+      "template": "Run the intraday screener workflow — scan the entire Nifty 50 for high-value stocks (prefer price > ₹500 to avoid manipulation), apply 8 criteria, pick the best stock, and write the HTML output at analysis/<date>/<counter>.html.",
+      "agent": "pick"
+    }
+  }
+}
