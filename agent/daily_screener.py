@@ -344,6 +344,8 @@ def generate_dashboard():
 
     github_html = f'<a href="{github_url}" style="color:#334155;text-decoration:none;">GitHub</a>' if github_url else ""
 
+    update_report_index()
+
     html = (DASHBOARD_HTML
         .replace("{badge_html}", badge_html)
         .replace("{stats_html}", stats_html)
