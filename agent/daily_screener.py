@@ -292,6 +292,9 @@ def generate_dashboard():
 <div class="stat-card"><div class="num" style="color:#a78bfa;">{avg_entry:,}</div><div class="lbl">Avg Entry</div></div>
 </div>"""
 
+    from os.path import relpath
+    report_rel = relpath(REPORT_DIR, ROOT_DIR).replace("\\", "/")
+
     latest_html = ""
     if trades:
         t = trades[-1]
@@ -308,7 +311,7 @@ def generate_dashboard():
         if os.path.exists(REPORT_DIR):
             for f in sorted(os.listdir(REPORT_DIR), reverse=True):
                 if f.endswith(".html") and f != "index.html" and date_str in f:
-                    report_link = f'report/{f}'
+                    report_link = f'{report_rel}/{f}'
                     break
 
         link_html = f'<a href="{report_link}" style="color:#60a5fa;font-size:13px;font-family:monospace;">View Report &rarr;</a>' if report_link else ""
@@ -335,7 +338,7 @@ def generate_dashboard():
             if os.path.exists(REPORT_DIR):
                 for f in sorted(os.listdir(REPORT_DIR), reverse=True):
                     if f.endswith(".html") and f != "index.html" and date_str in f:
-                        report_link = f'<a class="report-link" href="report/{f}">View</a>'
+                        report_link = f'<a class="report-link" href="{report_rel}/{f}">View</a>'
                         break
             rows.append(f"<tr><td>{t['date']}</td><td style=\"font-weight:700;\">{t['symbol']}</td><td>₹{t['entry']}</td><td style=\"color:#f87171;\">₹{t['sl']}</td><td style=\"color:#4ade80;\">₹{t['target']}</td><td class=\"{res_cls}\">{icon} {res}</td><td style=\"font-weight:700;\">{t['pnl']}</td><td>{report_link}</td></tr>")
         table_html = "<div style=\"overflow-x:auto;\"><table><thead><tr><th>Date</th><th>Stock</th><th>Entry</th><th>SL</th><th>Target</th><th>Result</th><th>PnL</th><th></th></tr></thead><tbody>" + "".join(rows) + "</tbody></table></div>"
