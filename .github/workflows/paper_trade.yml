@@ -2,7 +2,7 @@ name: Paper Trader — Daily Run
 
 on:
   schedule:
-    - cron: '30 10 * * 1-5'
+    - cron: '0 4 * * 1-5'
   workflow_dispatch:
 
 permissions:
