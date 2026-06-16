@@ -2,9 +2,8 @@ name: Paper Trader — Daily Run
 
 on:
   schedule:
-    # Run weekdays at 10:30 UTC = 4:00 PM IST (after market close + data settles)
     - cron: '30 10 * * 1-5'
-  workflow_dispatch:  # Allow manual trigger
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -30,9 +29,9 @@ jobs:
         run: |
           git config user.name "paper-trader-bot"
           git config user.email "bot@paper-trade.local"
-          git add paper_trader/ledger.json paper_trader/index.html paper-trading.html
-          git diff --cached --quiet || git commit -m "📊 Paper trade update $(date +'%Y-%m-%d')"
-          git pull --rebase origin main --autostash
+          git add paper_trader/ledger.json paper_trader/index.html
+          git diff --cached --quiet || git commit -m "Paper trade update $(date +'%Y-%m-%d')"
+          git pull --rebase --autostash
           git push
 
       - name: Deploy to GitHub Pages

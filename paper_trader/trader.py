@@ -1,21 +1,83 @@
 #!/usr/bin/env python3
-"""Paper trader — runs daily via GitHub Actions, zero manual steps."""
+"""Paper trader — RSI regime-aware gap trading. Runs daily via GitHub Actions."""
 import json, os, sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 import numpy as np
 
-IST = timezone.utc  # GitHub Actions runs UTC; adjust as needed
+IST = timezone.utc
 
-def get_day_strategy(dow):
-    strategies = {
-        0: {"name": "Monday — Fake Strength, Real Weakness", "dir": "SHORT", "dir_filter": lambda g: g > 0, "vol_filter": lambda v: v < 0.8, "other_filter": lambda e: True},
-        1: {"name": "Tuesday — Every Small Gap Counts", "dir": "BOTH", "dir_filter": lambda g: True, "vol_filter": lambda v: v < 0.8, "other_filter": lambda e: True},
-        2: {"name": "Wednesday — Buy the Fake Selloff", "dir": "LONG", "dir_filter": lambda g: g < 0, "vol_filter": lambda v: v < 1.5, "other_filter": lambda e: True},
-        3: {"name": "Thursday — Short the Fake Rally", "dir": "SHORT", "dir_filter": lambda g: g > 0, "vol_filter": lambda v: v < 1.5, "other_filter": lambda e: True},
-        4: {"name": "Friday — Weekend Prep", "dir": "BOTH", "dir_filter": lambda g: True, "vol_filter": lambda v: v < 1.5, "other_filter": lambda e: True},
-    }
-    return strategies.get(dow, strategies[1])
+def compute_rsi(series, period=14):
+    deltas = np.diff(series)
+    gains = np.where(deltas > 0, deltas, 0)
+    losses = np.where(deltas < 0, -deltas, 0)
+    avg_gain = np.mean(gains[:period])
+    avg_loss = np.mean(losses[:period])
+    if avg_loss == 0:
+        return 100.0
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    for i in range(period, len(deltas)):
+        delta = deltas[i]
+        gain = delta if delta > 0 else 0
+        loss = -delta if delta < 0 else 0
+        avg_gain = (avg_gain * (period - 1) + gain) / period
+        avg_loss = (avg_loss * (period - 1) + loss) / period
+        if avg_loss == 0:
+            rsi = 100.0
+        else:
+            rs = avg_gain / avg_loss
+            rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+def get_rsi_regime(rsi_val):
+    if rsi_val is None:
+        return "MID"
+    if rsi_val < 30:
+        return "LOW"
+    if rsi_val > 70:
+        return "HIGH"
+    return "MID"
+
+def decide_trade(rsi_regime, gap, abs_gap, vol_ratio, trade_dow):
+    """Core logic: RSI regime overrides day-wise strategy."""
+    if not (0.3 <= abs_gap <= 0.8):
+        return "NONE", ""
+
+    if rsi_regime == "LOW":
+        if gap > 0:
+            return "SHORT", "rsi-low gap-up fade"
+        return "NONE", ""
+
+    if rsi_regime == "HIGH":
+        if gap < 0:
+            return "LONG", "rsi-high gap-down buy"
+        return "NONE", ""
+
+    # MID regime — use day-wise strategy
+    if trade_dow == 0:
+        if gap > 0 and vol_ratio < 0.8:
+            return "SHORT", "mon gap-up fade"
+    elif trade_dow == 1:
+        if gap < 0 and vol_ratio < 0.8:
+            return "LONG", "tue gap-down reversal"
+        if gap > 0 and vol_ratio < 0.8:
+            return "SHORT", "tue gap-up fade"
+        if gap < 0 and vol_ratio < 1.5:
+            return "LONG", "tue gap-down mod vol"
+    elif trade_dow == 2:
+        if gap < 0:
+            return "LONG", "wed gap-down buy"
+    elif trade_dow == 3:
+        if gap > 0:
+            return "SHORT", "thu gap-up short"
+    elif trade_dow == 4:
+        if gap < 0 and vol_ratio < 0.8:
+            return "LONG", "fri gap-down bargain"
+        if gap > 0 and vol_ratio > 1.5:
+            return "SHORT", "fri gap-up covering"
+
+    return "NONE", ""
 
 def compute_stats(trades):
     if not trades:
@@ -30,11 +92,10 @@ def compute_stats(trades):
         "pnl": round(pnl, 2), "avg_pnl": round(pnl / total, 3) if total > 0 else 0
     }
 
-def generate_html(ledger, day_picks, today, day_name):
+def generate_html(ledger, day_picks, today, day_name, regime_summary=None):
     all_trades = ledger.get("trades", [])
     stats = compute_stats(all_trades)
 
-    # Day-by-day breakdown
     day_breakdown = defaultdict(list)
     for t in all_trades:
         day_breakdown[t.get("date", "unknown")].append(t)
@@ -44,61 +105,63 @@ def generate_html(ledger, day_picks, today, day_name):
         ds = compute_stats(trades)
         day_stats.append({"date": date, **ds})
 
-    # Cumulative PnL
     cum_pnl = []
     running = 0
     for t in all_trades:
         running += t.get("pnl", 0)
         cum_pnl.append(round(running, 2))
 
-    # Picks table
     picks_rows = ""
+    verdict = ""
+    if day_picks:
+        wins = sum(1 for p in day_picks if p.get("pnl", 0) > 0)
+        losses = sum(1 for p in day_picks if p.get("pnl", 0) < 0)
+        day_pnl = sum(p.get("pnl", 0) for p in day_picks)
+        verdict_cls = "green" if day_pnl >= 0 else "red"
+        verdict = f'<div class="verdict {verdict_cls}">Verdict: {wins}-{losses} ({wins+losses} trades) · Day PnL: {day_pnl:+.2f}%</div>'
+
     for p in day_picks:
         cls = "win" if p.get("pnl", 0) > 0 else ("loss" if p.get("pnl", 0) < 0 else "")
         dir_cls = "long" if p.get("trade") == "LONG" else "short"
-        picks_rows += f"<tr class='{cls}'><td>{p['stock']}</td><td class='{'red' if p['gap']>0 else 'green'}'>{p['gap']:+.2f}%</td><td>{p['vol_ratio']:.1f}x</td><td><span class='badge {dir_cls}'>{p['trade']}</span></td><td>{p['entry']}</td><td>{p['target']}</td><td>{p['sl']}</td><td>{p['close']}</td><td>{p['result']}</td><td>{p['pnl']:+.2f}%</td></tr>"
+        picks_rows += f"<tr class='{cls}'><td>{p['stock']}</td><td>{p.get('rsi',0):.0f}</td><td class='{'red' if p['gap']>0 else 'green'}'>{p['gap']:+.2f}%</td><td>{p['vol_ratio']:.1f}x</td><td><span class='badge {dir_cls}'>{p['trade']}</span></td><td>{p.get('rsi_regime','')}</td><td>{p['entry']}</td><td>{p['target']}</td><td>{p['sl']}</td><td>{p['close']}</td><td>{p['result']}</td><td>{p['pnl']:+.2f}%</td></tr>"
 
-    # Day history table
     history_rows = ""
     for ds in sorted(day_stats, key=lambda x: x["date"]):
         cls = "win" if ds["pnl"] > 0 else "loss"
         history_rows += f"<tr class='{cls}'><td>{ds['date']}</td><td>{ds['total']}</td><td>{ds['wins']}</td><td>{ds['losses']}</td><td>{ds['winrate']}%</td><td>{ds['pnl']:+.2f}%</td></tr>"
 
-    # Strategy for the trade date
-    strategy_rules = {
-        0: "Short gap-ups 0.3-0.8% with vol<0.8x. Skip gap-downs. 62.6% fill rate.",
-        1: "Trade BOTH directions. Gap-downs (82.1%) prefer LONG. Gap-ups (73.2%) SHORT. Vol<0.8x.",
-        2: "LONG all gap-downs 0.3-0.8%. Best setup 84.7% fill. NEVER short gap-ups.",
-        3: "SHORT all gap-ups 0.3-0.8%. 79.2% fill (low vol). NEVER buy gap-downs.",
-        4: "Gap-down + low vol → LONG (80.6%). Gap-up + high vol → SHORT (78.1%). Close by 3:10 PM.",
-    }
-    # Derive day from the picks data if available
-    today_dow = 1  # default Tue
-    if day_picks:
-        first = day_picks[0] if isinstance(day_picks, list) and len(day_picks) > 0 else None
-    else:
-        first = None
-    if first and "day" in first:
-        day_map = {"Monday":0,"Tuesday":1,"Wednesday":2,"Thursday":3,"Friday":4}
-        today_dow = day_map.get(first["day"], 1)
-    rule = strategy_rules.get(today_dow, "")
+    regime_block = ""
+    if regime_summary:
+        parts = []
+        for k, v in regime_summary.items():
+            if v > 0:
+                cls = "low-rsi" if k == "LOW" else ("high-rsi" if k == "HIGH" else "")
+                label = {"LOW": "RSI<30 (SHORT gap-ups)", "HIGH": "RSI>70 (LONG gap-downs)", "MID": "RSI 30-70 (day-wise)"}.get(k, k)
+                parts.append(f"<span class='{cls}'>{label}: {v} stocks</span>")
+        if parts:
+            regime_block = '<div class="rule">' + " · ".join(parts) + "</div>"
+
+    strategy_rules = (
+        "RSI<30 → short gap-ups only. RSI>70 → long gap-downs only. "
+        "RSI 30-70 → day-wise: Mon short up, Tue both, Wed long dn, Thu short up, Fri depends."
+    )
 
     html = f'''<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Paper Trader — Live</title>
+<title>Paper Trader — RSI Regime</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
 * {{ margin:0; padding:0; box-sizing:border-box; }}
 body {{ font-family:'Segoe UI',system-ui,sans-serif; background:#0f1117; color:#e1e4e8; padding:20px; }}
-h1 {{ font-size:24px; }}
+h1 {{ font-size:24px; margin-bottom:4px; }}
 h2 {{ font-size:18px; margin:20px 0 10px; color:#8b949e; }}
 .sub {{ color:#8b949e; font-size:14px; }}
 .stats {{ display:flex; gap:12px; flex-wrap:wrap; margin:16px 0; }}
 .stat {{ background:#161b22; border:1px solid #30363d; border-radius:8px; padding:12px 20px; flex:1; min-width:100px; }}
 .stat .num {{ font-size:28px; font-weight:700; }}
 .stat .lbl {{ font-size:12px; color:#8b949e; }}
-.green {{ color:#3fb950; }} .red {{ color:#f85149; }} .yellow {{ color:#d29922; }}
+.green {{ color:#3fb950; }} .red {{ color:#f85149; }} .yellow {{ color:#d29922; }} .purple {{ color:#a855f7; }}
 table {{ width:100%; border-collapse:collapse; margin:10px 0; font-size:13px; }}
 th, td {{ padding:6px 8px; text-align:left; border-bottom:1px solid #21262d; }}
 th {{ background:#161b22; color:#8b949e; font-weight:600; position:sticky; top:0; }}
@@ -109,13 +172,24 @@ tr.loss {{ border-left:3px solid #f85149; }}
 .long {{ background:#0d2810; color:#3fb950; }}
 .short {{ background:#280d0d; color:#f85149; }}
 .chart-box {{ background:#161b22; border:1px solid #30363d; border-radius:8px; padding:15px; margin:15px 0; }}
-.rule {{ background:#1a1d24; padding:10px 15px; border-radius:6px; font-size:13px; color:#8b949e; margin:10px 0; }}
+.rule {{ background:#1a1d24; padding:10px 15px; border-radius:6px; font-size:13px; color:#8b949e; margin:10px 0; line-height:1.6; }}
+.low-rsi {{ color:#f85149; font-weight:600; }}
+.high-rsi {{ color:#3fb950; font-weight:600; }}
+.verdict {{ font-size:16px; font-weight:700; padding:10px 15px; border-radius:6px; margin:10px 0; }}
+.verdict.green {{ background:#0d2810; color:#3fb950; border:1px solid #3fb950; }}
+.verdict.red {{ background:#280d0d; color:#f85149; border:1px solid #f85149; }}
+.verdict.neutral {{ background:#1a1d24; color:#8b949e; border:1px solid #30363d; }}
+.link-bar {{ margin:10px 0; font-size:13px; }}
+.link-bar a {{ color:#58a6ff; text-decoration:none; }}
+.link-bar a:hover {{ text-decoration:underline; }}
 </style></head>
 <body>
-<h1>📈 Paper Trader — Live Results</h1>
+<h1>Paper Trader — RSI Regime Strategy</h1>
 <p class="sub">Running daily via GitHub Actions · {today} · {day_name}</p>
 
-<div class="rule">📋 Today's strategy: <b>{day_name}</b> — {rule}</div>
+<div class="rule"><b>Rules:</b> {strategy_rules}</div>
+{regime_block}
+{verdict}
 
 <div class="stats">
 <div class="stat"><div class="num">{stats['total']}</div><div class="lbl">Total Trades</div></div>
@@ -129,11 +203,18 @@ tr.loss {{ border-left:3px solid #f85149; }}
 <div class="chart-box"><canvas id="cumChart" height="80"></canvas></div>
 <div class="chart-box"><canvas id="dayChart" height="80"></canvas></div>
 
-<h2>📊 Today's Picks ({len(day_picks)} trades)</h2>
-<table><tr><th>Stock</th><th>Gap</th><th>Vol</th><th>Trade</th><th>Entry</th><th>Target</th><th>SL</th><th>Close</th><th>Result</th><th>PnL</th></tr>{picks_rows}</table>
+<h2>Today's Picks ({len(day_picks)} trades)</h2>
+<table><tr><th>Stock</th><th>RSI</th><th>Gap</th><th>Vol</th><th>Trade</th><th>Regime</th><th>Entry</th><th>Target</th><th>SL</th><th>Close</th><th>Result</th><th>PnL</th></tr>{picks_rows}</table>
 
-<h2>📅 Daily History</h2>
+<h2>Daily History</h2>
 <table><tr><th>Date</th><th>Trades</th><th>Wins</th><th>Losses</th><th>Win Rate</th><th>PnL</th></tr>{history_rows}</table>
+
+<div class="link-bar">
+<a href="https://github.com/choudhary98akash/screener/blob/main/paper_trader/trader.py">Strategy Source</a> ·
+<a href="https://github.com/choudhary98akash/screener/blob/main/strategy-day-wise.md">Playbook</a> ·
+<a href="https://github.com/choudhary98akash/screener/blob/main/findings.md">Findings</a> ·
+<a href="https://github.com/choudhary98akash/screener/actions">Workflow Runs</a>
+</div>
 
 <script>
 const cumData = {json.dumps(cum_pnl)};
@@ -144,7 +225,7 @@ const dayWrs = {json.dumps([ds['winrate'] for ds in sorted(day_stats, key=lambda
 new Chart(document.getElementById('cumChart'), {{
     type: 'line',
     data: {{ labels: cumData.map((_,i)=>i+1), datasets: [{{ label:'Cumulative PnL %', data:cumData, borderColor:'#3fb950', backgroundColor:'rgba(63,185,80,0.1)', fill:true, tension:0.3 }}] }},
-    options: {{ responsive:true, plugins:{{ legend:{{ display:false }}, title:{{ display:true, text:'Cumulative PnL Over Time', color:'#8b949e' }} }}, scales:{{ x:{{ ticks:{{ color:'#8b949e' }} }}, y:{{ ticks:{{ color:'#8b949e' }} }} }} }}
+    options: {{ responsive:true, plugins:{{ legend:{{ display:false }}, title:{{ display:true, text:'Cumulative PnL', color:'#8b949e' }} }}, scales:{{ x:{{ ticks:{{ color:'#8b949e' }} }}, y:{{ ticks:{{ color:'#8b949e' }} }} }} }}
 }});
 
 new Chart(document.getElementById('dayChart'), {{
@@ -156,13 +237,12 @@ new Chart(document.getElementById('dayChart'), {{
     options: {{ responsive:true, plugins:{{ title:{{ display:true, text:'Daily Performance', color:'#8b949e' }} }}, scales:{{ x:{{ ticks:{{ color:'#8b949e' }} }}, y:{{ ticks:{{ color:'#8b949e' }}, position:'left' }}, y1:{{ ticks:{{ color:'#d29922' }}, position:'right', max:100, grid:{{ drawOnChartArea:false }} }} }} }}
 }});
 </script>
-<p style="color:#484f58;font-size:12px;margin-top:20px">Auto-generated by Paper Trader · {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC</p>
+<p style="color:#484f58;font-size:12px;margin-top:20px">Auto-generated · {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC</p>
 </body></html>'''
 
     return html
 
 def run_paper_trade():
-    # Import yfinance inside to avoid import errors if missing
     import yfinance as yf
 
     today = datetime.now()
@@ -176,10 +256,6 @@ def run_paper_trade():
 
     print(f"Running paper trade for {day_name} ({today.strftime('%Y-%m-%d')})")
 
-    strategy = get_day_strategy(dow)
-    print(f"Strategy: {strategy['name']}")
-
-    # Nifty 50 symbols
     symbols = [
         'RELIANCE.NS','TCS.NS','HDFCBANK.NS','INFY.NS','ICICIBANK.NS',
         'HINDUNILVR.NS','ITC.NS','SBIN.NS','BHARTIARTL.NS','KOTAKBANK.NS',
@@ -195,10 +271,8 @@ def run_paper_trade():
     stock_names = {s: s.replace('.NS','') for s in symbols}
 
     today_str = today.strftime('%Y-%m-%d')
-    from datetime import timedelta
-    # Fetch extra days ahead to ensure today's completed candle is available
     end_str = (today + timedelta(days=2)).strftime('%Y-%m-%d')
-    start_str = (today - timedelta(days=20)).strftime('%Y-%m-%d')
+    start_str = (today - timedelta(days=35)).strftime('%Y-%m-%d')
 
     print("Fetching data...")
     try:
@@ -210,12 +284,9 @@ def run_paper_trade():
     available_dates = [d.strftime('%Y-%m-%d') for d in df.index]
     print(f"Available dates: {available_dates}")
 
-    # Find the most recent trading day that has complete data
-    # If today (weekday) has data, use it (market closed)
     if today_str in available_dates and dow < 5:
         trade_date = today_str
     else:
-        # Otherwise use last completed day
         completed_dates = [d for d in available_dates if d < today_str]
         if not completed_dates:
             completed_dates = available_dates
@@ -223,37 +294,24 @@ def run_paper_trade():
     trade_dt = datetime.strptime(trade_date, '%Y-%m-%d')
     trade_dow = trade_dt.weekday()
 
-    # Override DOW with actual trade date's day
-    trade_dt = datetime.strptime(trade_date, '%Y-%m-%d')
-    trade_dow = trade_dt.weekday()
     print(f"Trade date: {trade_date} ({['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][trade_dow]})")
     print(f"System says today is {today_str} ({day_name}) — trading on {trade_date}")
 
-    # Get previous trading day
     idx = available_dates.index(trade_date)
     prev_date = available_dates[idx - 1] if idx > 0 else available_dates[0]
 
-    print(f"Trading date: {trade_date}, Prev date: {prev_date}")
-
-    # Check if already have picks for this date in ledger
     ledger_path = "paper_trader/ledger.json"
     if os.path.exists(ledger_path):
         ledger = json.load(open(ledger_path))
     else:
         ledger = {"trades": [], "runs": []}
 
-    # Use trade date's day of week for strategy
     actual_day_name = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"][trade_dow]
 
     existing_dates = {t.get("date") for t in ledger["trades"]}
     if trade_date in existing_dates:
         print(f"Already processed {trade_date} — skipping")
-        # Still regenerate HTML below
     else:
-        # Use trade date's day of week for strategy
-        strategy = get_day_strategy(trade_dow)
-        print(f"Using strategy: {strategy['name']}")
-        # Process
         try:
             yclose = df['Close'].loc[prev_date]
             topen = df['Open'].loc[trade_date]
@@ -261,11 +319,11 @@ def run_paper_trade():
             tlow = df['Low'].loc[trade_date]
             tclose = df['Close'].loc[trade_date]
             tvol = df['Volume'].loc[trade_date]
+            close_hist = df['Close'].loc[:trade_date]
         except Exception as e:
             print(f"Data error: {e}")
             return
 
-        # Compute market context — what % of stocks gap in each direction?
         gap_directions = []
         for sym in symbols:
             try:
@@ -278,9 +336,8 @@ def run_paper_trade():
             except:
                 continue
         pct_up = sum(1 for g in gap_directions if g > 0) / len(gap_directions) * 100 if gap_directions else 50
-        print(f"Market context: {len(gap_directions)} stocks with gaps, {pct_up:.0f}% gap-up, {100-pct_up:.0f}% gap-down")
+        print(f"Market context: {len(gap_directions)} stocks with gaps, {pct_up:.0f}% gap-up")
 
-        # Volume history
         vol_hist = df['Volume'].loc[:prev_date]
 
         day_picks = []
@@ -299,80 +356,27 @@ def run_paper_trade():
                 continue
 
             gap = (op - pc) / pc * 100
-            oc = (cp - op) / op * 100 if op != 0 else 0
-            day_range = (hp - lp) / pc * 100
+            abs_gap = abs(gap)
 
             vols = [float(v) for v in vol_hist[sym].dropna() if not np.isnan(float(v))]
             avg_vol = np.mean(vols[-10:]) if len(vols) >= 10 else np.mean(vols) if len(vols) > 0 else vt
             vol_ratio = vt / avg_vol if avg_vol > 0 else 1
 
-            gap_filled = (lp <= pc) if gap > 0 else (hp >= pc)
-            if gap > 0:
-                fill_pct = min(100, (op - lp) / (op - pc) * 100) if (op - pc) != 0 else 0
-            else:
-                fill_pct = min(100, (hp - op) / (pc - op) * 100) if (pc - op) != 0 else 0
+            close_prices = [float(c) for c in close_hist[sym].dropna() if not np.isnan(float(c))]
+            rsi_val = compute_rsi(np.array(close_prices)) if len(close_prices) >= 15 else None
+            rsi_regime = get_rsi_regime(rsi_val)
 
-            # Apply strategy
-            abs_gap = abs(gap)
-            trade = "NONE"
-            direction = ""
+            trade, direction = decide_trade(rsi_regime, gap, abs_gap, vol_ratio, trade_dow)
+
+            pnl = 0
+            result = "SKIP"
             target_price = 0
             sl_price = 0
 
-            # Market tide filter: if >70% stocks gap same direction, don't trade against it
-            # When 91% gap up, don't SHORT (which bets on gap filling = going down)
-            # When 91% gap down, don't LONG (which bets on gap filling = going up)
-            strong_tide_up = pct_up > 70
-            strong_tide_dn = pct_up < 30
-            fading_tide = (gap > 0 and strong_tide_up) or (gap < 0 and strong_tide_dn)
-
-            if 0.3 <= abs_gap <= 0.8 and not fading_tide:
-                # Tuesday: golden day, trade low-vol gaps in both directions
-                if trade_dow == 1:
-                    if gap < 0 and vol_ratio < 0.8:
-                        trade = "LONG"; direction = "gap-down reversal"
-                        target_price = op * (1 + abs_gap * 0.5 / 100)
-                        sl_price = op * (1 - 0.5 / 100)
-                    elif gap > 0 and vol_ratio < 0.8:
-                        trade = "SHORT"; direction = "gap-up fade"
-                        target_price = op * (1 - abs_gap * 0.5 / 100)
-                        sl_price = op * (1 + 0.5 / 100)
-                    elif gap < 0 and vol_ratio < 1.5:
-                        trade = "LONG"; direction = "moderate vol gap-down"
-                        target_price = op * (1 + abs_gap * 0.5 / 100)
-                        sl_price = op * (1 - 0.5 / 100)
-                # Wednesday: long gap-downs only
-                elif trade_dow == 2 and gap < 0:
-                    trade = "LONG"; direction = "gap-down buy"
-                    target_price = op * (1 + abs_gap * 0.5 / 100)
-                    sl_price = op * (1 - 0.5 / 100)
-                # Thursday: short gap-ups only
-                elif trade_dow == 3 and gap > 0:
-                    trade = "SHORT"; direction = "gap-up short"
-                    target_price = op * (1 - abs_gap * 0.5 / 100)
-                    sl_price = op * (1 + 0.5 / 100)
-                # Monday: short gap-ups only
-                elif trade_dow == 0 and gap > 0 and vol_ratio < 0.8:
-                    trade = "SHORT"; direction = "gap-up fade"
-                    target_price = op * (1 - abs_gap * 0.5 / 100)
-                    sl_price = op * (1 + 0.5 / 100)
-                # Friday: depends on volume
-                elif trade_dow == 4:
-                    if gap < 0 and vol_ratio < 0.8:
-                        trade = "LONG"; direction = "gap-down bargain"
-                        target_price = op * (1 + abs_gap * 0.5 / 100)
-                        sl_price = op * (1 - 0.5 / 100)
-                    elif gap > 0 and vol_ratio > 1.5:
-                        trade = "SHORT"; direction = "gap-up short covering"
-                        target_price = op * (1 - abs_gap * 0.5 / 100)
-                        sl_price = op * (1 + 0.5 / 100)
-
-            # Compute PnL
-            pnl = 0
-            result = "SKIP"
             if trade != "NONE":
-                # For SHORT trades (gap-up): gap fills when low <= prev_close
-                # For LONG trades (gap-down):  gap fills when high >= prev_close
+                target_price = op * (1 + abs_gap * 0.5 / 100) if trade == "LONG" else op * (1 - abs_gap * 0.5 / 100)
+                sl_price = op * (1 - 0.5 / 100) if trade == "LONG" else op * (1 + 0.5 / 100)
+
                 if trade == "LONG":
                     gap_filled_check = hp >= pc
                     sl_hit = lp <= sl_price
@@ -381,7 +385,7 @@ def run_paper_trade():
                     sl_hit = hp >= sl_price
 
                 if gap_filled_check:
-                    result = "✅ FILLED"
+                    result = "FILLED"
                     if trade == "LONG":
                         achieved = min(hp, target_price)
                         pnl = round(max(0, (achieved - op) / op * 100), 2)
@@ -390,26 +394,23 @@ def run_paper_trade():
                         pnl = round(max(0, (op - achieved) / op * 100), 2)
                 elif sl_hit:
                     pnl = -0.5
-                    result = "❌ STOPPED"
+                    result = "STOPPED"
                 else:
-                    if trade == "LONG":
-                        pnl = round((cp - op) / op * 100, 2)
-                    else:
-                        pnl = round((op - cp) / op * 100, 2)
-                    result = "⏳ OPEN"
+                    pnl = round(((cp - op) / op * 100) if trade == "LONG" else ((op - cp) / op * 100), 2)
+                    result = "OPEN"
 
                 day_picks.append({
-                    "stock": name, "gap": round(gap, 2), "abs_gap": round(abs_gap, 2),
+                    "stock": name, "rsi": round(rsi_val, 1) if rsi_val else 0,
+                    "gap": round(gap, 2), "abs_gap": round(abs_gap, 2),
                     "vol_ratio": round(vol_ratio, 2), "trade": trade,
+                    "rsi_regime": rsi_regime,
                     "entry": round(op, 2), "target": round(target_price, 2),
                     "sl": round(sl_price, 2), "close": round(cp, 2),
                     "result": result, "pnl": pnl, "direction": direction,
-                    "gap_filled": gap_filled, "fill_pct": round(fill_pct, 1),
                     "date": trade_date, "day": actual_day_name,
                     "market_tide": f"{pct_up:.0f}% up"
                 })
 
-        # Save to ledger
         for p in day_picks:
             ledger["trades"].append(p)
         ledger["runs"].append({"date": trade_date, "day": day_name, "trades": len(day_picks)})
@@ -419,23 +420,22 @@ def run_paper_trade():
 
         print(f"Recorded {len(day_picks)} trades for {trade_date}")
 
-    # Generate HTML
-    # Get picks for today
     todays_picks = [t for t in ledger["trades"] if t.get("date") == trade_date]
 
-    html = generate_html(ledger, todays_picks, trade_date, actual_day_name)
+    regime_summary = {"LOW": 0, "MID": 0, "HIGH": 0}
+    for p in todays_picks:
+        r = p.get("rsi_regime", "")
+        if r in regime_summary:
+            regime_summary[r] += 1
+
+    html = generate_html(ledger, todays_picks, trade_date, actual_day_name, regime_summary)
     html_path = "paper_trader/index.html"
     with open(html_path, "w", encoding="utf-8") as f:
-        f.write(html)
-
-    # Copy to root for easy access
-    with open("paper-trading.html", "w", encoding="utf-8") as f:
         f.write(html)
 
     print(f"Dashboard: {html_path}")
     print(f"Root copy: paper-trading.html")
 
-    # Summary
     all_trades = ledger["trades"]
     wins = sum(1 for t in all_trades if t.get("pnl", 0) > 0)
     losses = sum(1 for t in all_trades if t.get("pnl", 0) < 0)

@@ -596,4 +596,65 @@ Most high-WR patterns have zero or negative OC (gap fills but stock goes nowhere
 
 ---
 
+## 14. The RSI Regime Breakthrough — Why Day-Wise Got It Wrong
+
+### 14.1 The Core Discovery
+
+When you split gap behavior by RSI regime, the day-wise strategy's "rules" break:
+
+**RSI < 30 (Oversold / Downtrend):**
+- Gap-ups: 83.5% fill rate BUT avg OC = −0.75% (short them!)
+- Gap-downs: 75.5% fill rate BUT avg OC = −0.18% (no long edge)
+- The stock is in a downtrend. The gap fill is a bull trap. Day-of-week doesn't save it.
+
+**RSI > 70 (Overbought / Uptrend):**
+- Gap-downs: 84.8% fill rate AND avg OC = +0.40% (buy them!)
+- Gap-ups: 68.9% fill rate AND avg OC = +0.31% (no short edge)
+- Momentum survives the fill. Day-of-week doesn't change this.
+
+### 14.2 Best EV by Regime × Day × Direction
+
+| Regime | Day | Gap Direction | Action | EV/Trade | Fill Rate | OC if Filled |
+|--------|-----|--------------|--------|---------|-----------|-------------|
+| LOW | Mon | Up | SHORT | **+0.98%** | 78.9% | −1.24% |
+| LOW | Fri | Up | SHORT | +0.75% | 72.4% | −1.03% |
+| LOW | Wed | Up | SHORT | +0.72% | 95.5% | −0.75% |
+| LOW | Thu | Up | SHORT | +0.44% | 94.1% | −0.47% |
+| LOW | Tue | Up | SHORT | +0.34% | 87.5% | −0.39% |
+| HIGH | Mon | Down | LONG | **+0.93%** | 87.0% | +1.07% |
+| HIGH | Wed | Down | LONG | +0.65% | 78.6% | +0.83% |
+| HIGH | Thu | Down | LONG | +0.58% | 85.7% | +0.68% |
+| HIGH | Tue | Down | LONG | +0.56% | 94.1% | +0.60% |
+| HIGH | Fri | Down | LONG | +0.29% | 93.9% | +0.31% |
+| MID | Mon | Up | SHORT | +0.50% | 62.0% | −0.81% |
+| MID | Thu | Up | SHORT | +0.48% | 77.8% | −0.62% |
+| MID | Fri | Up | SHORT | +0.47% | 63.6% | −0.74% |
+| MID | Wed | Down | LONG | +0.36% | 85.5% | +0.42% |
+
+### 14.3 The Rule That Replaces Everything
+
+```
+IF RSI < 30:  SHORT gap-ups. Skip gap-downs. Day doesn't matter.
+IF RSI > 70:  LONG gap-downs. Skip gap-ups. Day doesn't matter.
+IF 30-70:     Use day-wise rules. Wednesday gap-down is best.
+```
+
+### 14.4 Why This Was Overlooked
+
+The original analysis looked at day × direction × volume. It assumed "gap fill = good" and that gaps mean-revert. But:
+- RSI < 30 stocks gap fill 83.5% of the time, yet the OC is −0.75% — the gap fills but the stock goes down
+- This is the "Smart Money Pattern" (Section 13.3): gap fills are head fakes in trending markets
+- The day-wise strategy's best setup (Wednesday gap-down) has EV = −0.38% for LOW RSI stocks
+- The day-wise strategy's worst setup (Monday gap-down) has EV = +0.93% for HIGH RSI stocks
+- RSI regime flips which setups are good and which are bad
+
+### 14.5 Current State (Jun 16, 2026)
+
+6 oversold (RSI<30): ONGC(8.0), NTPC(17.8), TATACONSUM(22.5), DRREDDY(26.1), WIPRO(26.4), SBILIFE(27.6)
+1 overbought (RSI>70): SBIN(79.3)
+
+For Wednesday: short any oversold gap-up (EV=+0.72%), long SBIN if it gaps down (EV=+0.65%).
+
+---
+
 *Generated from real yfinance data. No fabricated numbers. No strategy assumptions. Just what the data says.*
