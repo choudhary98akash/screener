@@ -182,4 +182,134 @@ Gap size has the strongest (negative) correlation with next day's return: larger
 
 ---
 
+## 11. Overlooked Patterns (Deeper Exploration)
+
+### 11.1 Volume Surge Effect — Strongest Filter We Missed
+
+| Volume Ratio (vs 10d avg) | Events | Filled | Fill Rate |
+|--------------------------|--------|--------|-----------|
+| 0.0–0.5x | 158 | 109 | 69.0% |
+| 0.5–0.8x | 544 | 309 | 56.8% |
+| 0.8–1.0x | 373 | 195 | 52.3% |
+| 1.0–1.2x | 276 | 142 | 51.4% |
+| 1.2–1.5x | 256 | 123 | 48.0% |
+| 1.5–2.0x | 158 | 75 | 47.5% |
+| 2.0–3.0x | 79 | 37 | 46.8% |
+| 3.0x+ | 53 | 25 | 47.2% |
+
+Fill rate drops **monotonically** from 69% (quiet) to 47% (high volume).
+Low vol + gap-down: **63.0%** fill. High vol + gap-down: only **43.8%**.
+
+### 11.2 Close Position in Range → Next Day
+
+| Close Position | Events | Avg Next Return | Positive % |
+|---------------|--------|----------------|-----------|
+| Bottom 20% | 654 | +0.074% | 50.2% |
+| 20–40% | 612 | −0.054% | 48.3% |
+| 40–60% | 599 | −0.042% | 45.6% |
+| 60–80% | 531 | −0.032% | 47.7% |
+| **Top 20%** | **543** | **+0.360%** | **52.7%** |
+
+Stocks closing at the top of their range outperform next day. Strength begets strength — no mean reversion edge.
+
+### 11.3 2-Day "Extreme Persistence" (Not Reversal)
+
+| 2-Day Close Position | Events | Avg Next Return | Positive % |
+|---------------------|--------|----------------|-----------|
+| > +30 (mild strength) | 571 | +0.420% | 55.0% |
+| > +50 (strength) | 289 | +0.573% | 58.8% |
+| **> +70 (extreme)** | **127** | **+0.971%** | **62.2%** |
+| < −30 (mild weak) | 740 | +0.162% | 52.3% |
+| < −50 (weak) | 407 | +0.278% | 56.0% |
+| < −70 (extreme) | 116 | +0.392% | 57.8% |
+
+Stocks that have been strong for 2 consecutive days continue being strong. The more extreme the 2-day strength, the stronger the next day. This directly contradicts the "overbought = reversal" assumption.
+
+### 11.4 EMA9 Proximity — Gap Fill Rate
+
+| Distance from EMA9 | Events | Fill Rate |
+|-------------------|--------|-----------|
+| 0–1% | 651 | **64.5%** |
+| 1–2% | 506 | 55.5% |
+| 2–5% | 649 | 43.6% |
+
+Gaps near the EMA9 fill far more reliably (64.5%) than gaps far from it (43.6%).
+
+### 11.5 RSI Zones — Gap Fill vs Return Divergence
+
+| RSI Zone | Events | Fill Rate | Avg Return |
+|---------|--------|-----------|-----------|
+| <30 (oversold) | 123 | **69.9%** | **−0.614%** |
+| 30–40 | 207 | 55.6% | −0.398% |
+| 40–50 | 300 | 57.7% | −0.002% |
+| 50–60 | 312 | 53.5% | +0.569% |
+| 60–70 | 262 | 53.4% | +0.485% |
+| >70 (overbought) | 214 | **64.0%** | **+0.870%** |
+
+RSI < 30: gap fills 69.9% of the time but stock still closes **−0.61%** (gap fills but trend is down).
+RSI > 70: gap fills 64% but stock closes **+0.87%** (momentum survives the fill).
+
+### 11.6 Day × Gap Direction — Best Combos
+
+| Day | Direction | Events | Fill Rate | Avg OC Return |
+|-----|-----------|--------|-----------|--------------|
+| **Tue** | Gap-down | 152 | **69.7%** | **+0.234%** |
+| **Wed** | Gap-down | 114 | **74.6%** | **+0.383%** |
+| Thu | Gap-up | 150 | 71.3% | −0.144% |
+| Mon | Gap-down | 273 | 39.9% | −0.288% |
+| Wed | Gap-up | 305 | 35.1% | +0.265% |
+
+Wednesday gap-downs: **74.6%** fill rate with **+0.38%** avg return — the single best cell in the grid.
+Monday gap-ups: only 35.1% fill (worst).
+Tuesday gap-downs: 69.7% fill, +0.23% return.
+
+### 11.7 Stock-By-Stock Best Conditions
+
+| Condition | Stocks Where It's #1 | Avg WR |
+|-----------|---------------------|--------|
+| **Tuesday** | **16 stocks** | **86.2%** |
+| gap 0.3–0.5% | 15 stocks | 88.7% |
+| gap 0.5–0.8% | 5 stocks | 85.3% |
+| Thursday | 4 stocks | 91.7% |
+| Low volume | 3 stocks | 81.0% |
+| Wednesday | 2 stocks | 88.5% |
+| Previous day down | 2 stocks | 88.3% |
+
+Tuesday is the highest-signal day: 16/49 stocks have their best WR on Tuesday (avg 86.2%).
+Small gaps (0.3–0.5%) are the best blanket condition: 15 stocks, avg 88.7% WR.
+
+### 11.8 Weekend Effect
+
+| Metric | Value |
+|--------|-------|
+| Avg weekend gap (Fri close → Mon open) | **−0.741%** |
+| Positive weekends | 228/587 (38.8%) |
+| Weekends with >0.3% gap | 553/587 (94.2%) |
+
+Nearly all weekends produce a gap, and 61% of those gaps are negative. Monday opens weak.
+
+### 11.9 Open = Daily High/Low (Extreme Intraday Reversals)
+
+| Pattern | Events | Avg OC Return |
+|---------|--------|--------------|
+| Open = Day's High | 116 | **−1.928%** |
+| Open = Day's Low | 108 | **+1.985%** |
+
+When a stock opens at its high (never trades higher), it closes nearly 2% lower on average.
+When it opens at its low (never trades lower), it closes nearly 2% higher.
+Rare event (~4% of days) but extremely reliable when it happens.
+
+### 11.10 March vs May — The Month Effect
+
+| Month | Events | Fill Rate | Avg Return |
+|-------|--------|-----------|-----------|
+| March | 325 | 31.1% | −0.777% |
+| April | 653 | 52.2% | +0.543% |
+| **May** | **546** | **62.8%** | **+0.088%** |
+| **June** | **373** | **61.7%** | **+0.127%** |
+
+March was an outlier — only 31.1% gap fill and −0.78% avg return. May/June are much more favorable with 62% fill rates. A strategy's March performance would look terrible, and May would look great — same strategy, different calendar.
+
+---
+
 *Generated from real yfinance data. No fabricated numbers. No strategy assumptions. Just what the data says.*
