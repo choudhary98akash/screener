@@ -1,0 +1,92 @@
+{
+  "trades": [
+    {
+      "stock": "AXISBANK",
+      "gap": -0.35,
+      "abs_gap": 0.35,
+      "vol_ratio": 0.57,
+      "trade": "LONG",
+      "entry": 1363.5,
+      "target": 1365.89,
+      "sl": 1356.68,
+      "close": 1366.5,
+      "result": "\u2705 FILLED",
+      "pnl": 0.18,
+      "direction": "gap-down reversal",
+      "gap_filled": true,
+      "fill_pct": 100,
+      "date": "2026-06-16",
+      "day": "Tuesday",
+      "market_tide": "91% up"
+    },
+    {
+      "stock": "BAJFINANCE",
+      "rsi": 65.2,
+      "gap": -0.47,
+      "abs_gap": 0.47,
+      "vol_ratio": 0.43,
+      "trade": "LONG",
+      "rsi_regime": "MID",
+      "entry": 955.1,
+      "target": 957.36,
+      "sl": 950.32,
+      "close": 955.9,
+      "result": "FILLED",
+      "pnl": 0.24,
+      "direction": "wed gap-down buy",
+      "date": "2026-06-17",
+      "day": "Wednesday",
+      "market_tide": "87% up"
+    },
+    {
+      "stock": "SBILIFE",
+      "rsi": 48.8,
+      "gap": -0.66,
+      "abs_gap": 0.66,
+      "vol_ratio": 0.51,
+      "trade": "LONG",
+      "rsi_regime": "MID",
+      "entry": 1756.0,
+      "target": 1761.76,
+      "sl": 1747.22,
+      "close": 1785.3,
+      "result": "FILLED",
+      "pnl": 0.33,
+      "direction": "wed gap-down buy",
+      "date": "2026-06-17",
+      "day": "Wednesday",
+      "market_tide": "87% up"
+    },
+    {
+      "stock": "TATACONSUM",
+      "rsi": 34.4,
+      "gap": -0.43,
+      "abs_gap": 0.43,
+      "vol_ratio": 0.46,
+      "trade": "LONG",
+      "rsi_regime": "MID",
+      "entry": 1126.0,
+      "target": 1128.44,
+      "sl": 1120.37,
+      "close": 1120.3,
+      "result": "FILLED",
+      "pnl": 0.22,
+      "direction": "wed gap-down buy",
+      "date": "2026-06-17",
+      "day": "Wednesday",
+      "market_tide": "87% up"
+    }
+  ],
+  "runs": [
+    {
+      "date": "2026-06-16",
+      "day": "Tuesday",
+      "trades": 1
+    },
+    {
+      "date": "2026-06-17",
+      "day": "Wednesday",
+      "trades": 3
+    }
+  ]
+}
