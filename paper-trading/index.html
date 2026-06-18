@@ -37,29 +37,29 @@ tr.loss { border-left:3px solid #f85149; }
 </style></head>
 <body>
 <h1>Paper Trader — RSI Regime Strategy</h1>
-<p class="sub">Running daily via GitHub Actions · 2026-06-17 · Wednesday</p>
+<p class="sub">Running daily via GitHub Actions · 2026-06-18 · Thursday</p>
 
 <div class="rule"><b>Rules:</b> RSI<30 → short gap-ups only. RSI>70 → long gap-downs only. RSI 30-70 → day-wise: Mon short up, Tue both, Wed long dn, Thu short up, Fri depends.</div>
-<div class="rule"><span class=''>RSI 30-70 (day-wise): 3 stocks</span></div>
-<div class="verdict green">Verdict: 3-0 (3 trades) · Day PnL: +0.79%</div>
+<div class="rule"><span class='low-rsi'>RSI<30 (SHORT gap-ups): 1 stocks</span> · <span class=''>RSI 30-70 (day-wise): 6 stocks</span></div>
+<div class="verdict green">Verdict: 6-1 (7 trades) · Day PnL: +0.76%</div>
 
 <div class="stats">
-<div class="stat"><div class="num">4</div><div class="lbl">Total Trades</div></div>
-<div class="stat"><div class="num green">4</div><div class="lbl">Wins</div></div>
-<div class="stat"><div class="num red">0</div><div class="lbl">Losses</div></div>
-<div class="stat"><div class="num green">100.0%</div><div class="lbl">Win Rate</div></div>
-<div class="stat"><div class="num green">+0.97%</div><div class="lbl">Total PnL</div></div>
-<div class="stat"><div class="num green">+0.242%</div><div class="lbl">Avg PnL/Trade</div></div>
+<div class="stat"><div class="num">11</div><div class="lbl">Total Trades</div></div>
+<div class="stat"><div class="num green">10</div><div class="lbl">Wins</div></div>
+<div class="stat"><div class="num red">1</div><div class="lbl">Losses</div></div>
+<div class="stat"><div class="num green">90.9%</div><div class="lbl">Win Rate</div></div>
+<div class="stat"><div class="num green">+1.73%</div><div class="lbl">Total PnL</div></div>
+<div class="stat"><div class="num green">+0.157%</div><div class="lbl">Avg PnL/Trade</div></div>
 </div>
 
 <div class="chart-box"><canvas id="cumChart" height="80"></canvas></div>
 <div class="chart-box"><canvas id="dayChart" height="80"></canvas></div>
 
-<h2>Today's Picks (3 trades)</h2>
-<table><tr><th>Stock</th><th>RSI</th><th>Gap</th><th>Vol</th><th>Trade</th><th>Regime</th><th>Entry</th><th>Target</th><th>SL</th><th>Close</th><th>Result</th><th>PnL</th></tr><tr class='win'><td>BAJFINANCE</td><td>65</td><td class='green'>-0.47%</td><td>0.4x</td><td><span class='badge long'>LONG</span></td><td>MID</td><td>955.1</td><td>957.36</td><td>950.32</td><td>955.9</td><td>FILLED</td><td>+0.24%</td></tr><tr class='win'><td>SBILIFE</td><td>49</td><td class='green'>-0.66%</td><td>0.5x</td><td><span class='badge long'>LONG</span></td><td>MID</td><td>1756.0</td><td>1761.76</td><td>1747.22</td><td>1785.3</td><td>FILLED</td><td>+0.33%</td></tr><tr class='win'><td>TATACONSUM</td><td>34</td><td class='green'>-0.43%</td><td>0.5x</td><td><span class='badge long'>LONG</span></td><td>MID</td><td>1126.0</td><td>1128.44</td><td>1120.37</td><td>1120.3</td><td>FILLED</td><td>+0.22%</td></tr></table>
+<h2>Today's Picks (7 trades)</h2>
+<table><tr><th>Stock</th><th>RSI</th><th>Gap</th><th>Vol</th><th>Trade</th><th>Regime</th><th>Entry</th><th>Target</th><th>SL</th><th>Close</th><th>Result</th><th>PnL</th></tr><tr class='win'><td>HINDUNILVR</td><td>52</td><td class='red'>+0.51%</td><td>0.4x</td><td><span class='badge short'>SHORT</span></td><td>MID</td><td>2208.7</td><td>2203.12</td><td>2219.74</td><td>2205.0</td><td>FILLED</td><td>+0.25%</td></tr><tr class='win'><td>ONGC</td><td>17</td><td class='red'>+0.39%</td><td>0.5x</td><td><span class='badge short'>SHORT</span></td><td>LOW</td><td>245.95</td><td>245.47</td><td>247.18</td><td>243.25</td><td>FILLED</td><td>+0.19%</td></tr><tr class='win'><td>NTPC</td><td>40</td><td class='red'>+0.41%</td><td>0.7x</td><td><span class='badge short'>SHORT</span></td><td>MID</td><td>357.0</td><td>356.27</td><td>358.78</td><td>362.55</td><td>FILLED</td><td>+0.20%</td></tr><tr class='win'><td>SBILIFE</td><td>48</td><td class='red'>+0.41%</td><td>0.6x</td><td><span class='badge short'>SHORT</span></td><td>MID</td><td>1801.0</td><td>1797.28</td><td>1810.0</td><td>1797.8</td><td>FILLED</td><td>+0.21%</td></tr><tr class='win'><td>BPCL</td><td>64</td><td class='red'>+0.33%</td><td>0.5x</td><td><span class='badge short'>SHORT</span></td><td>MID</td><td>319.0</td><td>318.47</td><td>320.59</td><td>316.1</td><td>FILLED</td><td>+0.17%</td></tr><tr class='loss'><td>BEL</td><td>58</td><td class='red'>+0.63%</td><td>1.8x</td><td><span class='badge short'>SHORT</span></td><td>MID</td><td>422.5</td><td>421.17</td><td>424.61</td><td>427.8</td><td>STOPPED</td><td>-0.50%</td></tr><tr class='win'><td>BAJAJHLDNG</td><td>58</td><td class='red'>+0.48%</td><td>0.7x</td><td><span class='badge short'>SHORT</span></td><td>MID</td><td>10550.0</td><td>10524.88</td><td>10602.75</td><td>10582.0</td><td>FILLED</td><td>+0.24%</td></tr></table>
 
 <h2>Daily History</h2>
-<table><tr><th>Date</th><th>Trades</th><th>Wins</th><th>Losses</th><th>Win Rate</th><th>PnL</th></tr><tr class='win'><td>2026-06-16</td><td>1</td><td>1</td><td>0</td><td>100.0%</td><td>+0.18%</td></tr><tr class='win'><td>2026-06-17</td><td>3</td><td>3</td><td>0</td><td>100.0%</td><td>+0.79%</td></tr></table>
+<table><tr><th>Date</th><th>Trades</th><th>Wins</th><th>Losses</th><th>Win Rate</th><th>PnL</th></tr><tr class='win'><td>2026-06-16</td><td>1</td><td>1</td><td>0</td><td>100.0%</td><td>+0.18%</td></tr><tr class='win'><td>2026-06-17</td><td>3</td><td>3</td><td>0</td><td>100.0%</td><td>+0.79%</td></tr><tr class='win'><td>2026-06-18</td><td>7</td><td>6</td><td>1</td><td>85.7%</td><td>+0.76%</td></tr></table>
 
 <div class="link-bar">
 <a href="https://github.com/choudhary98akash/screener/blob/main/paper_trader/trader.py">Strategy Source</a> ·
@@ -69,10 +69,10 @@ tr.loss { border-left:3px solid #f85149; }
 </div>
 
 <script>
-const cumData = [0.18, 0.42, 0.75, 0.97];
-const dayLabels = ["2026-06-16", "2026-06-17"];
-const dayPnls = [0.18, 0.79];
-const dayWrs = [100.0, 100.0];
+const cumData = [0.18, 0.42, 0.75, 0.97, 1.22, 1.41, 1.61, 1.82, 1.99, 1.49, 1.73];
+const dayLabels = ["2026-06-16", "2026-06-17", "2026-06-18"];
+const dayPnls = [0.18, 0.79, 0.76];
+const dayWrs = [100.0, 100.0, 85.7];
 
 new Chart(document.getElementById('cumChart'), {
     type: 'line',
@@ -89,5 +89,5 @@ new Chart(document.getElementById('dayChart'), {
     options: { responsive:true, plugins:{ title:{ display:true, text:'Daily Performance', color:'#8b949e' } }, scales:{ x:{ ticks:{ color:'#8b949e' } }, y:{ ticks:{ color:'#8b949e' }, position:'left' }, y1:{ ticks:{ color:'#d29922' }, position:'right', max:100, grid:{ drawOnChartArea:false } } } }
 });
 </script>
-<p style="color:#484f58;font-size:12px;margin-top:20px">Auto-generated · 2026-06-17 09:01:30 UTC</p>
+<p style="color:#484f58;font-size:12px;margin-top:20px">Auto-generated · 2026-06-18 08:44:36 UTC</p>
 </body></html>
