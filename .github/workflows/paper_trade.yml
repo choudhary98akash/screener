@@ -1,8 +1,9 @@
-name: Paper Trader — Daily Run
+name: Paper Trader — Morning Picks + Evening Verdict
 
 on:
   schedule:
-    - cron: '0 4 * * 1-5'
+    - cron: '45 22 * * 0-4'  # 22:45 UTC = 4:15 AM IST (morning picks)
+    - cron: '0 5 * * 1-5'    # 5:00 UTC = 10:30 AM IST (evening verdict)
   workflow_dispatch:
 
 permissions:
@@ -30,7 +31,7 @@ jobs:
           git config user.name "paper-trader-bot"
           git config user.email "bot@paper-trade.local"
           git add paper_trader/ledger.json paper_trader/index.html
-          git diff --cached --quiet || git commit -m "Paper trade update $(date +'%Y-%m-%d')"
+          git diff --cached --quiet || git commit -m "Paper trade $(date +'%Y-%m-%d %H:%M')"
           git pull --rebase --autostash
           git push
 
