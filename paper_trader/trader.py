@@ -741,7 +741,7 @@ def run_paper_trade(override_date=None):
             regime_summary[r] += 1
 
     html = generate_html(ledger, todays_picks, trade_date, actual_day_name, mode, regime_summary)
-    html_path = "paper_trader/index.html"
+    html_path = "index.html"
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)
 
