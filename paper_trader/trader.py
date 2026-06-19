@@ -500,22 +500,8 @@ const dayLabels = {json.dumps([ds['date'] for ds in sorted(day_stats, key=lambda
 const dayPnls = {json.dumps([ds['pnl'] for ds in sorted(day_stats, key=lambda x: x['date'])])};
 const dayWrs = {json.dumps([ds['winrate'] for ds in sorted(day_stats, key=lambda x: x['date'])])};
 
-new Chart(document.getElementById('cumChart'), {{
-    type: 'line',
-    data: {{ labels: cumData.map((_,i)=>i+1), datasets: [{{ label:'Cumulative PnL %', data:cumData, borderColor:'#3fb950', backgroundColor:'rgba(63,185,80,0.1)', fill:true, tension:0.3 }}] }},
-    options: {{ responsive:true, plugins:{{ legend:{{ display:false }}, title:{{ display:true, text:'Cumulative PnL', color:'#8b949e' }} }}, scales:{{ x:{{ ticks:{{ color:'#8b949e' }} }}, y:{{ ticks:{{ color:'#8b949e' }} }} }} }}
-}});
-
-new Chart(document.getElementById('dayChart'), {{
-    type: 'bar',
-    data: {{ labels: dayLabels, datasets: [
-        {{ label:'Daily PnL %', data:dayPnls, backgroundColor:dayPnls.map(v=>v>=0?'rgba(63,185,80,0.7)':'rgba(248,81,73,0.7)'), borderColor:dayPnls.map(v=>v>=0?'#3fb950':'#f85149'), borderWidth:1 }},
-        {{ label:'Win Rate %', data:dayWrs, type:'line', borderColor:'#d29922', backgroundColor:'rgba(210,153,34,0.1)', fill:false, tension:0.3, yAxisID:'y1' }}
-    ] }},
-    options: {{ responsive:true, plugins:{{ title:{{ display:true, text:'Daily Performance', color:'#8b949e' }} }}, scales:{{ x:{{ ticks:{{ color:'#8b949e' }} }}, y:{{ ticks:{{ color:'#8b949e' }}, position:'left' }}, y1:{{ ticks:{{ color:'#d29922' }}, position:'right', max:100, grid:{{ drawOnChartArea:false }} }} }} }}
-}});
-
 document.querySelectorAll('.trade-row').forEach(row => {{
+
     row.addEventListener('click', () => {{
         const idx = row.dataset.tradeIndex;
         const detail = document.querySelector(`.trade-detail[data-trade-index="${{idx}}"]`);
@@ -524,6 +510,25 @@ document.querySelectorAll('.trade-row').forEach(row => {{
         }}
     }});
 }});
+
+try {{
+    new Chart(document.getElementById('cumChart'), {{
+        type: 'line',
+        data: {{ labels: cumData.map((_,i)=>i+1), datasets: [{{ label:'Cumulative PnL %', data:cumData, borderColor:'#3fb950', backgroundColor:'rgba(63,185,80,0.1)', fill:true, tension:0.3 }}] }},
+        options: {{ responsive:true, plugins:{{ legend:{{ display:false }}, title:{{ display:true, text:'Cumulative PnL', color:'#8b949e' }} }}, scales:{{ x:{{ ticks:{{ color:'#8b949e' }} }}, y:{{ ticks:{{ color:'#8b949e' }} }} }} }}
+    }});
+}} catch(e) {{ console.log('cumChart error:', e); }}
+
+try {{
+    new Chart(document.getElementById('dayChart'), {{
+        type: 'bar',
+        data: {{ labels: dayLabels, datasets: [
+            {{ label:'Daily PnL %', data:dayPnls, backgroundColor:dayPnls.map(v=>v>=0?'rgba(63,185,80,0.7)':'rgba(248,81,73,0.7)'), borderColor:dayPnls.map(v=>v>=0?'#3fb950':'#f85149'), borderWidth:1 }},
+            {{ label:'Win Rate %', data:dayWrs, type:'line', borderColor:'#d29922', backgroundColor:'rgba(210,153,34,0.1)', fill:false, tension:0.3, yAxisID:'y1' }}
+        ] }},
+        options: {{ responsive:true, plugins:{{ title:{{ display:true, text:'Daily Performance', color:'#8b949e' }} }}, scales:{{ x:{{ ticks:{{ color:'#8b949e' }} }}, y:{{ ticks:{{ color:'#8b949e' }}, position:'left' }}, y1:{{ ticks:{{ color:'#d29922' }}, position:'right', max:100, grid:{{ drawOnChartArea:false }} }} }} }}
+    }});
+}} catch(e) {{ console.log('dayChart error:', e); }}
 </script>
 <p style="color:#484f58;font-size:12px;margin-top:20px">Auto-generated · {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} UTC</p>
 </body></html>'''
