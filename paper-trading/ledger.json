@@ -3290,6 +3290,12 @@
       "day": "Thursday",
       "trades": 17,
       "mode": "evening"
+    },
+    {
+      "date": "2026-07-03",
+      "day": "Friday",
+      "trades": 0,
+      "mode": "evening"
     }
   ]
 }
