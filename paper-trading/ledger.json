@@ -4125,6 +4125,12 @@
       "day": "Thursday",
       "trades": 10,
       "mode": "evening"
+    },
+    {
+      "date": "2026-07-10",
+      "day": "Friday",
+      "trades": 0,
+      "mode": "evening"
     }
   ]
 }
