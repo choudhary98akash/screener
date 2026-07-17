@@ -4760,6 +4760,52 @@
       "date": "2026-07-16",
       "day": "Thursday",
       "market_tide": "96% up"
+    },
+    {
+      "stock": "NESTLEIND",
+      "rsi": 54.6,
+      "gap": -0.53,
+      "abs_gap": 0.53,
+      "vol_ratio": 0.18,
+      "trade": "LONG",
+      "rsi_regime": "MID",
+      "entry": 1416.0,
+      "target": 1419.73,
+      "sl": 1408.92,
+      "close": 1422.7,
+      "high": 1428.5,
+      "low": 1405.1,
+      "prev_close": 1423.5,
+      "open": 1416.0,
+      "result": "FILLED",
+      "pnl": 0.26,
+      "direction": "fri gap-down bargain",
+      "date": "2026-07-17",
+      "day": "Friday",
+      "market_tide": "62% up"
+    },
+    {
+      "stock": "ASIANPAINT",
+      "rsi": 47.3,
+      "gap": -0.36,
+      "abs_gap": 0.36,
+      "vol_ratio": 0.29,
+      "trade": "LONG",
+      "rsi_regime": "MID",
+      "entry": 2665.0,
+      "target": 2669.83,
+      "sl": 2651.68,
+      "close": 2687.7,
+      "high": 2700.0,
+      "low": 2665.0,
+      "prev_close": 2674.7,
+      "open": 2665.0,
+      "result": "FILLED",
+      "pnl": 0.18,
+      "direction": "fri gap-down bargain",
+      "date": "2026-07-17",
+      "day": "Friday",
+      "market_tide": "62% up"
     }
   ],
   "runs": [
@@ -4890,6 +4936,12 @@
       "date": "2026-07-16",
       "day": "Thursday",
       "trades": 12,
+      "mode": "evening"
+    },
+    {
+      "date": "2026-07-17",
+      "day": "Friday",
+      "trades": 2,
       "mode": "evening"
     }
   ]
