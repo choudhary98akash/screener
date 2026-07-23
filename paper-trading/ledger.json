@@ -5496,6 +5496,29 @@
       "date": "2026-07-22",
       "day": "Wednesday",
       "market_tide": "22% up"
+    },
+    {
+      "stock": "NESTLEIND",
+      "rsi": 56.1,
+      "gap": 0.44,
+      "abs_gap": 0.44,
+      "vol_ratio": 0.72,
+      "trade": "SHORT",
+      "rsi_regime": "MID",
+      "entry": 1500.1,
+      "target": 1496.84,
+      "sl": 1507.6,
+      "close": 1449.5,
+      "high": 1503.5,
+      "low": 1448.1,
+      "prev_close": 1493.6,
+      "open": 1500.1,
+      "result": "FILLED",
+      "pnl": 0.22,
+      "direction": "thu gap-up short",
+      "date": "2026-07-23",
+      "day": "Thursday",
+      "market_tide": "8% up"
     }
   ],
   "runs": [
@@ -5650,6 +5673,12 @@
       "date": "2026-07-22",
       "day": "Wednesday",
       "trades": 14,
+      "mode": "evening"
+    },
+    {
+      "date": "2026-07-23",
+      "day": "Thursday",
+      "trades": 1,
       "mode": "evening"
     }
   ]
