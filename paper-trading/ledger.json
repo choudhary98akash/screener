@@ -7014,6 +7014,52 @@
       "date": "2026-07-30",
       "day": "Thursday",
       "market_tide": "68% up"
+    },
+    {
+      "stock": "WIPRO",
+      "rsi": 67.2,
+      "gap": -0.79,
+      "abs_gap": 0.79,
+      "vol_ratio": 0.62,
+      "trade": "LONG",
+      "rsi_regime": "MID",
+      "entry": 184.85,
+      "target": 185.58,
+      "sl": 183.93,
+      "close": 184.95,
+      "high": 185.24,
+      "low": 180.83,
+      "prev_close": 186.33,
+      "open": 184.85,
+      "result": "STOPPED",
+      "pnl": -0.5,
+      "direction": "fri gap-down bargain",
+      "date": "2026-07-31",
+      "day": "Friday",
+      "market_tide": "78% up"
+    },
+    {
+      "stock": "HDFCLIFE",
+      "rsi": 35.6,
+      "gap": 0.61,
+      "abs_gap": 0.61,
+      "vol_ratio": 3.32,
+      "trade": "SHORT",
+      "rsi_regime": "MID",
+      "entry": 548.7,
+      "target": 547.04,
+      "sl": 551.44,
+      "close": 546.05,
+      "high": 549.3,
+      "low": 544.3,
+      "prev_close": 545.4,
+      "open": 548.7,
+      "result": "FILLED",
+      "pnl": 0.3,
+      "direction": "fri gap-up covering",
+      "date": "2026-07-31",
+      "day": "Friday",
+      "market_tide": "78% up"
     }
   ],
   "runs": [
@@ -7204,6 +7250,12 @@
       "date": "2026-07-30",
       "day": "Thursday",
       "trades": 10,
+      "mode": "evening"
+    },
+    {
+      "date": "2026-07-31",
+      "day": "Friday",
+      "trades": 2,
       "mode": "evening"
     }
   ]
