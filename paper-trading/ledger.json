@@ -8334,6 +8334,12 @@
       "day": "Wednesday",
       "trades": 5,
       "mode": "evening"
+    },
+    {
+      "date": "2026-08-13",
+      "day": "Thursday",
+      "trades": 0,
+      "mode": "evening"
     }
   ]
 }
