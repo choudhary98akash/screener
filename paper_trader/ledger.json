@@ -8346,6 +8346,12 @@
       "day": "Monday",
       "trades": 0,
       "mode": "evening"
+    },
+    {
+      "date": "2026-08-18",
+      "day": "Tuesday",
+      "trades": 0,
+      "mode": "evening"
     }
   ]
 }
