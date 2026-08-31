@@ -8440,6 +8440,29 @@
       "date": "2026-08-28",
       "day": "Friday",
       "market_tide": "81% up"
+    },
+    {
+      "stock": "KOTAKBANK",
+      "rsi": 72.1,
+      "gap": -0.64,
+      "abs_gap": 0.64,
+      "vol_ratio": 1.36,
+      "trade": "LONG",
+      "rsi_regime": "HIGH",
+      "entry": 421.0,
+      "target": 422.34,
+      "sl": 418.89,
+      "close": 419.4,
+      "high": 425.05,
+      "low": 419.4,
+      "prev_close": 423.7,
+      "open": 421.0,
+      "result": "FILLED",
+      "pnl": 0.32,
+      "direction": "rsi-high gap-down buy",
+      "date": "2026-08-31",
+      "day": "Monday",
+      "market_tide": "14% up"
     }
   ],
   "runs": [
@@ -8732,6 +8755,12 @@
       "date": "2026-08-28",
       "day": "Friday",
       "trades": 3,
+      "mode": "evening"
+    },
+    {
+      "date": "2026-08-31",
+      "day": "Monday",
+      "trades": 1,
       "mode": "evening"
     }
   ]
