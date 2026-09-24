@@ -12676,6 +12676,12 @@
       "day": "Wednesday",
       "trades": 12,
       "mode": "evening"
+    },
+    {
+      "date": "2026-09-24",
+      "day": "Thursday",
+      "trades": 0,
+      "mode": "evening"
     }
   ]
 }
