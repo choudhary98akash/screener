@@ -13235,6 +13235,12 @@
       "day": "Wednesday",
       "trades": 12,
       "mode": "evening"
+    },
+    {
+      "date": "2026-10-01",
+      "day": "Thursday",
+      "trades": 0,
+      "mode": "evening"
     }
   ]
 }
