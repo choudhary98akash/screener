@@ -14880,6 +14880,52 @@
       "date": "2026-10-16",
       "day": "Friday",
       "market_tide": "91% up"
+    },
+    {
+      "stock": "ONGC",
+      "rsi": 42.9,
+      "gap": 0.45,
+      "abs_gap": 0.45,
+      "vol_ratio": 0.47,
+      "trade": "SHORT",
+      "rsi_regime": "MID",
+      "entry": 223.0,
+      "target": 222.5,
+      "sl": 224.11,
+      "close": 225.0,
+      "high": 226.25,
+      "low": 223.0,
+      "prev_close": 222.0,
+      "open": 223.0,
+      "result": "STOPPED",
+      "pnl": -0.5,
+      "direction": "mon gap-up fade",
+      "date": "2026-10-19",
+      "day": "Monday",
+      "market_tide": "54% up"
+    },
+    {
+      "stock": "ADANIPORTS",
+      "rsi": 54.8,
+      "gap": 0.74,
+      "abs_gap": 0.74,
+      "vol_ratio": 0.66,
+      "trade": "SHORT",
+      "rsi_regime": "MID",
+      "entry": 1763.8,
+      "target": 1757.25,
+      "sl": 1772.62,
+      "close": 1766.0,
+      "high": 1784.9,
+      "low": 1746.0,
+      "prev_close": 1750.8,
+      "open": 1763.8,
+      "result": "FILLED",
+      "pnl": 0.37,
+      "direction": "mon gap-up fade",
+      "date": "2026-10-19",
+      "day": "Monday",
+      "market_tide": "54% up"
     }
   ],
   "runs": [
@@ -15375,6 +15421,12 @@
     {
       "date": "2026-10-16",
       "day": "Friday",
+      "trades": 2,
+      "mode": "evening"
+    },
+    {
+      "date": "2026-10-19",
+      "day": "Monday",
       "trades": 2,
       "mode": "evening"
     }
