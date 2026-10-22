@@ -15386,6 +15386,52 @@
       "date": "2026-10-21",
       "day": "Wednesday",
       "market_tide": "73% up"
+    },
+    {
+      "stock": "TCS",
+      "rsi": 72.3,
+      "gap": -0.36,
+      "abs_gap": 0.36,
+      "vol_ratio": 0.5,
+      "trade": "LONG",
+      "rsi_regime": "HIGH",
+      "entry": 2520.0,
+      "target": 2524.48,
+      "sl": 2507.4,
+      "close": 2505.7,
+      "high": 2533.0,
+      "low": 2479.0,
+      "prev_close": 2529.0,
+      "open": 2520.0,
+      "result": "FILLED",
+      "pnl": 0.18,
+      "direction": "rsi-high gap-down buy",
+      "date": "2026-10-22",
+      "day": "Thursday",
+      "market_tide": "4% up"
+    },
+    {
+      "stock": "BHARTIARTL",
+      "rsi": 58.1,
+      "gap": 0.49,
+      "abs_gap": 0.49,
+      "vol_ratio": 1.29,
+      "trade": "SHORT",
+      "rsi_regime": "MID",
+      "entry": 1901.0,
+      "target": 1896.33,
+      "sl": 1910.5,
+      "close": 1897.0,
+      "high": 1920.3,
+      "low": 1874.1,
+      "prev_close": 1891.7,
+      "open": 1901.0,
+      "result": "FILLED",
+      "pnl": 0.25,
+      "direction": "thu gap-up short",
+      "date": "2026-10-22",
+      "day": "Thursday",
+      "market_tide": "4% up"
     }
   ],
   "runs": [
@@ -15894,6 +15940,12 @@
       "date": "2026-10-21",
       "day": "Wednesday",
       "trades": 20,
+      "mode": "evening"
+    },
+    {
+      "date": "2026-10-22",
+      "day": "Thursday",
+      "trades": 2,
       "mode": "evening"
     }
   ]
