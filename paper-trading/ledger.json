@@ -16260,6 +16260,29 @@
       "date": "2026-10-30",
       "day": "Friday",
       "market_tide": "61% up"
+    },
+    {
+      "stock": "INFY",
+      "rsi": 63.2,
+      "gap": 0.58,
+      "abs_gap": 0.58,
+      "vol_ratio": 0.66,
+      "trade": "SHORT",
+      "rsi_regime": "MID",
+      "entry": 1191.9,
+      "target": 1188.43,
+      "sl": 1197.86,
+      "close": 1161.0,
+      "high": 1194.5,
+      "low": 1151.0,
+      "prev_close": 1185.0,
+      "open": 1191.9,
+      "result": "FILLED",
+      "pnl": 0.29,
+      "direction": "mon gap-up fade",
+      "date": "2026-11-02",
+      "day": "Monday",
+      "market_tide": "83% up"
     }
   ],
   "runs": [
@@ -16810,6 +16833,12 @@
       "date": "2026-10-30",
       "day": "Friday",
       "trades": 5,
+      "mode": "evening"
+    },
+    {
+      "date": "2026-11-02",
+      "day": "Monday",
+      "trades": 1,
       "mode": "evening"
     }
   ]
